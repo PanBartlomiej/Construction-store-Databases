@@ -49,6 +49,8 @@ public class MyFrame extends JFrame implements ActionListener {
     JTextField login;
     JPasswordField haslo;
     boolean flagaLogowania = false;
+    JComboBox sortuj;
+    JComboBox sortuj2;
     MyFrame(){
         try {
             c = DriverManager.getConnection("jdbc:postgresql://abul.db.elephantsql.com:5432/lworthdg","lworthdg","e84EiOBZhRvQ-a0gE19g470LvdUJOjzm");
@@ -59,6 +61,8 @@ public class MyFrame extends JFrame implements ActionListener {
         }
 
 
+
+
         this.setLayout(null);
         this.setSize(800,800);
         this.setLocation(400,20);
@@ -67,7 +71,14 @@ public class MyFrame extends JFrame implements ActionListener {
         this.setVisible(true);
 
 
+
         this.getContentPane().setBackground(new Color(30,80,30));
+
+        JLabel tytul = new JLabel("Manager sklepu");
+        tytul.setForeground(new Color(229, 184, 1));
+        tytul.setBounds(300,10,300,30);
+        tytul.setFont(new Font("Arial",Font.PLAIN,30));
+        this.add(tytul);
 
         przyciski.add(new JButton("Dodaj klienkta"));
         przyciski.get(0).setBounds(200,100,200,20);
@@ -610,20 +621,29 @@ public class MyFrame extends JFrame implements ActionListener {
             panels.get(3).removeAll();
             panels.get(3).setVisible(true);
             panels.get(3).setBounds(100,250,600,300);
+            panels.get(3).setBackground(new Color(30,80,30));
+            JLabel text = new JLabel("Dostawcy:");
+            text.setForeground(new Color(229, 184, 1));
+            text.setBounds(20,0,200,20);
+            String[] sortujTempo = {"NIP","nazwa","adres"};
+            sortuj = new JComboBox(sortujTempo);
+            sortuj.addActionListener(this);
+            panels.get(3).add(sortuj);
+            panels.get(3).add(text);
 
+            panelTabelka2 = new JPanel();
+            panelTabelka2.removeAll();
+            panels.get(3).add(panelTabelka2);
             if (c != null) {
                 System.out.println("Polaczenie z baza danych OK ! ");
                 try {
-                    PreparedStatement pst = c.prepareStatement("SELECT NIP,nazwa,adres FROM projekt.Dostawcy", ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
+                    PreparedStatement pst = c.prepareStatement("SELECT NIP,nazwa,adres FROM projekt.Dostawcy ORDER BY  "+sortuj.getSelectedItem(), ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
 
                     ResultSet rs ;
                     rs = pst.executeQuery();
                     JTable tabelka = new JTable(buildTableModel(rs));
                     tabelka.addNotify();
                     JTableHeader h1 = tabelka.getTableHeader();
-                    JLabel text = new JLabel("Dostawcy:");
-                    text.setForeground(new Color(0,0,0));
-                    text.setBounds(20,0,200,20);
 
                     h1.setBounds(0,20,600,20);
                     tabelka.setBounds(0,40,600,300);
@@ -634,17 +654,13 @@ public class MyFrame extends JFrame implements ActionListener {
                     tabelka.getColumnModel().getColumn(1).setPreferredWidth(198);
                     tabelka.getColumnModel().getColumn(2).setPreferredWidth(198);
 
-                    JPanel panelTabelka = new JPanel();
-                    panelTabelka.setLayout(new BorderLayout());
-                    panelTabelka.setPreferredSize(new Dimension(600, 400));
+                    panelTabelka2.setLayout(new BorderLayout());
+                    panelTabelka2.setPreferredSize(new Dimension(600, 400));
                     JScrollPane scroller = new JScrollPane(tabelka,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-                    panelTabelka.add(scroller);
-                    panelTabelka.setVisible(true);
-                   // panels.get(3).add(tabelka);
+                    panelTabelka2.add(scroller);
+                    panelTabelka2.setVisible(true);
 
-                    panels.get(3).add(text);
-                    panels.get(3).add(panelTabelka, BorderLayout.CENTER);
-                    panels.get(3).setBackground(new Color(30,80,30));
+                    panels.get(3).setVisible(true);
 
                     //panels.get(3).setLayout(null);
                     rs.close();
@@ -654,6 +670,42 @@ public class MyFrame extends JFrame implements ActionListener {
             }
 
     }
+        if(e.getSource()==sortuj)
+        {
+            panels.get(3).setVisible(false);
+            panelTabelka2.removeAll();
+            if (c != null) {
+                System.out.println("Polaczenie z baza danych OK ! ");
+                try {
+                    PreparedStatement pst = c.prepareStatement("SELECT NIP,nazwa,adres FROM projekt.Dostawcy ORDER BY  "+sortuj.getSelectedItem(), ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
+
+                    ResultSet rs ;
+                    rs = pst.executeQuery();
+                    JTable tabelka = new JTable(buildTableModel(rs));
+                    tabelka.addNotify();
+                    JTableHeader h1 = tabelka.getTableHeader();
+
+                    h1.setBounds(0,20,600,20);
+                    tabelka.setBounds(0,40,600,300);
+                    tabelka.setAutoResizeMode(1);
+                    tabelka.setEnabled(false);
+                    tabelka.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+                    tabelka.getColumnModel().getColumn(0).setPreferredWidth(198);
+                    tabelka.getColumnModel().getColumn(1).setPreferredWidth(198);
+                    tabelka.getColumnModel().getColumn(2).setPreferredWidth(198);
+
+                    panelTabelka2.setLayout(new BorderLayout());
+                    panelTabelka2.setPreferredSize(new Dimension(600, 400));
+                    JScrollPane scroller = new JScrollPane(tabelka,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+                    panelTabelka2.add(scroller);
+                    panelTabelka2.setVisible(true);
+                    panels.get(3).setVisible(true);
+                    rs.close();
+                    pst.close();    }
+                catch(SQLException e1)  {
+                    System.out.println("Blad podczas przetwarzania danych:"+e1) ;   }
+            }
+        }
             if(e.getSource()==przyciski.get(4)) {
 
                 for(JPanel panel: panels)
@@ -800,19 +852,31 @@ public class MyFrame extends JFrame implements ActionListener {
             panels.get(5).setVisible(true);
             panels.get(5).setBounds(100,250,600,300);
 
+                panels.get(5).setBackground(new Color(30,80,30));
 
+            String[] sortujTempo = {"id_klient","imie","nazwisko","adres"};
+            sortuj2 = new JComboBox(sortujTempo);
+            sortuj2.addActionListener(this);
+                JLabel text = new JLabel("Klienci:");
+                text.setForeground(new Color(229, 184, 1));
+                text.setBounds(20,0,200,20);
+
+            panels.get(5).add(sortuj2);
+            panels.get(5).add(text);
+
+            panelTabelka2 = new JPanel();
+            panelTabelka2.removeAll();
+            panels.get(5).add(panelTabelka2);
             if (c != null) {
                 System.out.println("Polaczenie z baza danych OK ! ");
                 try {
-                    PreparedStatement pst = c.prepareStatement("SELECT id_klient,imie,nazwisko,adres FROM projekt.klienci", ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
+                    PreparedStatement pst = c.prepareStatement("SELECT id_klient,imie,nazwisko,adres FROM projekt.klienci ORDER BY  "+sortuj2.getSelectedItem(), ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
+
                     ResultSet rs ;
                     rs = pst.executeQuery();
                     JTable tabelka = new JTable(buildTableModel(rs));
                     tabelka.addNotify();
                     JTableHeader h1 = tabelka.getTableHeader();
-                    JLabel text = new JLabel("Dostawcy:");
-                    text.setForeground(new Color(0,0,0));
-                    text.setBounds(20,0,200,20);
 
                     h1.setBounds(0,20,600,20);
                     tabelka.setBounds(0,40,600,300);
@@ -823,15 +887,12 @@ public class MyFrame extends JFrame implements ActionListener {
                     tabelka.getColumnModel().getColumn(1).setPreferredWidth(198);
                     tabelka.getColumnModel().getColumn(2).setPreferredWidth(198);
 
-                    JPanel panelTabelka = new JPanel();
-                    panelTabelka.setLayout(new BorderLayout());
-                    panelTabelka.setPreferredSize(new Dimension(600, 400));
+                    panelTabelka2.setLayout(new BorderLayout());
+
+                    panelTabelka2.setPreferredSize(new Dimension(600, 400));
                     JScrollPane scroller = new JScrollPane(tabelka,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-                    panelTabelka.add(scroller);
-                    panelTabelka.setVisible(true);
-                    panels.get(5).add(text);
-                    panels.get(5).add(panelTabelka, BorderLayout.CENTER);
-                    panels.get(5).setBackground(new Color(30,80,30));
+                    panelTabelka2.add(scroller);
+                    panelTabelka2.setVisible(true);
 
                     rs.close();
                     pst.close();    }
@@ -840,6 +901,44 @@ public class MyFrame extends JFrame implements ActionListener {
             }
 
         }
+            if(e.getSource()==sortuj2)
+            {
+
+                panels.get(5).setVisible(false);
+                panelTabelka2.removeAll();
+                if (c != null) {
+                    System.out.println("Polaczenie z baza danych OK ! ");
+                    try {
+                        PreparedStatement pst = c.prepareStatement("SELECT id_klient,imie,nazwisko,adres FROM projekt.klienci ORDER BY "+sortuj2.getSelectedItem(), ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
+
+                        ResultSet rs ;
+                        rs = pst.executeQuery();
+                        JTable tabelka = new JTable(buildTableModel(rs));
+                        tabelka.addNotify();
+                        JTableHeader h1 = tabelka.getTableHeader();
+
+                        h1.setBounds(0,20,600,20);
+                        tabelka.setBounds(0,40,600,300);
+                        tabelka.setAutoResizeMode(1);
+                        tabelka.setEnabled(false);
+                        tabelka.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+                        tabelka.getColumnModel().getColumn(0).setPreferredWidth(198);
+                        tabelka.getColumnModel().getColumn(1).setPreferredWidth(198);
+                        tabelka.getColumnModel().getColumn(2).setPreferredWidth(198);
+
+                        panelTabelka2.setLayout(new BorderLayout());
+                        panelTabelka2.setPreferredSize(new Dimension(600, 400));
+                        JScrollPane scroller = new JScrollPane(tabelka,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+                        panelTabelka2.add(scroller);
+                        panelTabelka2.setVisible(true);
+
+                        panels.get(5).setVisible(true);
+                        rs.close();
+                        pst.close();    }
+                    catch(SQLException e1)  {
+                        System.out.println("Blad podczas przetwarzania danych:"+e1) ;   }
+                }
+            }
         if(e.getSource()==przyciski.get(6) ) {
             /**
              * wypisanie wszystkich produktów
@@ -866,7 +965,7 @@ public class MyFrame extends JFrame implements ActionListener {
             panels.get(6).add(przyciskProdukty);
 
             JLabel text = new JLabel("Lista Produktów:");
-            text.setForeground(new Color(0, 0, 0));
+            text.setForeground(new Color(229, 184, 1));
             text.setBounds(20, 0, 200, 20);
 
             panels.get(6).add(text);
