@@ -12,6 +12,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Vector;
 
+/**
+ * @author Bartłomiej Leśnicki
+ * @version 1.1
+ * Klasa MyFrame jest główną klasą aplikacji
+ * Tworzy i zarządza Ramkę opartą o JFrame
+ * Obsułguje Wszystkie przyciski oraz Baze danych
+ *
+ *
+ */
+
 public class MyFrame extends JFrame implements ActionListener {
 
 
@@ -58,6 +68,14 @@ public class MyFrame extends JFrame implements ActionListener {
     JTextField id;
     JTextField klient;
 
+    /**
+     * Konstuktor
+     * Definiuje część zmiennych
+     * Ustawia połączenie z bazą danych
+     * Definiuje wielkość ramki i większość przycisków
+     * w aplikacji
+     * Ustawia wygląd aplikacji
+     */
     MyFrame() {
         try {
             c = DriverManager.getConnection("jdbc:postgresql://castor.db.elephantsql.com:5432/jnrpleqo", "jnrpleqo", "SOC4IyXEnPVcd1gQGW6ZH5ZOxW1uep0b");
@@ -161,6 +179,14 @@ public class MyFrame extends JFrame implements ActionListener {
 
     }
 
+    /**
+     * Metoda Buduje tabele typu DefaultTableModel
+     * na podstawie zwróconego ResultSet'u
+     * zróconego przez zapytanie SQL
+     * @param rs ResultSet zwórcony przez dane zapytanie SQL
+     * @return Zwraca tabele typu DefaultTableModel
+     * @throws SQLException
+     */
     public static DefaultTableModel buildTableModel(ResultSet rs)
             throws SQLException {
         ResultSetMetaData metaData = rs.getMetaData();
@@ -184,6 +210,15 @@ public class MyFrame extends JFrame implements ActionListener {
 
     }
 
+    /**
+     * Metoda sprawdza czy podany napis strNum jest wartością numeryczną
+     * zwraca true jeśli jest wartością numeryczną
+     * zwraca false jeśli nie jest wartością numeryczną
+     * wykorzystuje do tego metode parseInt z klasy Integer
+     * która może parsować tylko String który jest liczbą
+     * @param strNum napis typu String
+     * @return true jeżeli strNum jest wartością numeryczną zwraca false jeśli nie jest wartością numeryczną
+     */
     public static boolean isNumeric(String strNum) {
         if (strNum == null) {
             return false;
@@ -196,13 +231,23 @@ public class MyFrame extends JFrame implements ActionListener {
         return true;
     }
 
+
     /**
-     * obsługa przycisków menu
+     * Funkcja z interfajsu ActionListener
+     * obsuługuje wszystkie zdarzenia zdefiniowane w programie
+     * (przyciski, Comboboxy itp)
+     *
+     * @param e ActionEvent
      */
 
     @Override
     public void actionPerformed(ActionEvent e) {
 
+        /**
+         * część kodu odpowiedzialna za przycisk zaloguj
+         * ustawia panel do wyświetlenia formularza do logowania
+         * Pobiera tabele administratorów (osób które mogą się zalogować)
+         */
         if (e.getSource() == przyciski.get(7)) {
             for (JPanel panel : panels)
                 panel.setVisible(false);
@@ -254,8 +299,14 @@ public class MyFrame extends JFrame implements ActionListener {
             }
         }
 
-        if (e.getSource() == loguj) {
+        /**
+         * część kodu odpoiwedzialna za przycisk zaloguj przy formularzu
+         * weryfikuje czy podany login i hasło są poprawne, jeśli są to
+         * Dodaje dodatkowe możliwości do aplikacji dostępne tylko dla Administratora
+         *
+         */
 
+        if (e.getSource() == loguj) {
             if ((loginy.contains((String) login.getText())) && hasla.contains((String) haslo.getText())) {
                 flagaLogowania = true;
                 JOptionPane.showMessageDialog(this, "Zalogowano poprawnie");
@@ -270,6 +321,10 @@ public class MyFrame extends JFrame implements ActionListener {
 
             this.setVisible(true);
         }
+        /**
+         * obsługuje przycisk wylogowania
+         * przywraca możliwości dotępne dla zwykłego urzytkownika
+         */
         if (e.getSource() == wyloguj) {
             if (flagaLogowania == true) {
                 JOptionPane.showMessageDialog(this, "Wylogowałeś się");
@@ -280,10 +335,12 @@ public class MyFrame extends JFrame implements ActionListener {
             przyciski.get(9).setVisible(false);
             przyciski.get(10).setVisible(false);
         }
+
+        /**
+         * obusłga przycisku Dodaj klienta
+         * tworzy formularz potrzebny do dodania klienta
+         */
         if (e.getSource() == przyciski.get(0)) {
-            /**
-             * obusłga przycisku Dodaj klienta
-             */
             for (JPanel panel : panels)
                 panel.setVisible(false);
             panels.get(0).removeAll();
@@ -325,11 +382,12 @@ public class MyFrame extends JFrame implements ActionListener {
             panels.get(0).setVisible(true);
             panels.get(0).setLayout(null);
         }
+
+        /**
+         * Obusłga przycisku Dodaj klienta w polu dodawania klientów
+         * Dodawanie klienta do bazy Danych do tabeli klienci
+         */
         if (e.getSource() == wyslij) {
-            /**
-             * Obusłga przycisku wyślij w polu dodawania klientów
-             * Dodawanie klienta do bazy Danych do tabeli klienci
-             */
 
             panels.get(0).setVisible(false);
             if (imie.getText().equals("") || nazwisko.getText().equals("") || adres.getText().equals("")) {
@@ -366,6 +424,10 @@ public class MyFrame extends JFrame implements ActionListener {
                 }
             }
         }
+        /**
+         * Obsluga przycisku sprzedaj
+         * Tworzy formularz wysuzkiwania Produktu
+         */
         if (e.getSource() == przyciski.get(1)) {
 
             for (JPanel panel : panels)
@@ -428,12 +490,14 @@ public class MyFrame extends JFrame implements ActionListener {
 
             panels.get(1).setPreferredSize(new Dimension(500, 500));
         }
+        /**
+         * Obsluga przycisku szukaj w fromularzu sprzedaży
+         * wyszukuje produkt w bazie danych i wypisuje
+         * w postaci tabeli zwrócony wynik dodaje
+         * możliwość sprzedaży wybranego produktu
+         *
+         */
         if (e.getSource() == szukajPrzycisk) {
-            /**
-             * dodanie produktów do bazy danych
-             *
-             */
-
             panels.get(1).setVisible(false);
             if (szukaj.getText().equals("")) {
                 JOptionPane.showMessageDialog(this, "Podaj prawidłowe dane");
@@ -523,6 +587,12 @@ public class MyFrame extends JFrame implements ActionListener {
             }
 
         }
+        /**
+         * Obsługa przycisku Sprzedaj w formularzu sprzedaży produktu
+         * Sprzedaje produkt klientowi to jest zmienia ilość produktów w odpowiedniej tabeli
+         * Po wcześniejszej walidacji wpisanych do formularza danych
+         * Dodaje produkty do tabeli sprzedaży projekt1.sprzeda
+         */
         if (e.getSource() == sprzedaj) {
             System.out.println("Przycisk Działa");
             if (c != null) {
@@ -602,10 +672,11 @@ public class MyFrame extends JFrame implements ActionListener {
                 }
             }
         }
+        /**
+         * obusłga przycisku Dodaj Dostawce
+         * Tworzy formularz potrzbeny do dodania dostawcy
+         */
         if (e.getSource() == przyciski.get(2)) {
-            /**
-             * obusłga przycisku Dodaj klienta
-             */
             for (JPanel panel : panels)
                 panel.setVisible(false);
             panels.get(2).removeAll();
@@ -648,11 +719,14 @@ public class MyFrame extends JFrame implements ActionListener {
             panels.get(2).setVisible(true);
             panels.get(2).setLayout(null);
         }
+        /**
+         * Obsluguje przycisk dodaj dostawce w formularzu dodawania dostawców
+         * dodanie dostawcy do bazy danych
+         * Po wcześniejszej walidacji wpisanych do formularza danych
+         *
+         */
         if (e.getSource() == wyslijDostawce) {
-            /**
-             * dodanie dostawcy do bazy danych
-             *
-             */
+
 
             if (imie.getText().equals("") || nazwisko.getText().equals("") || adres.getText().equals("")) {
                 JOptionPane.showMessageDialog(this, "Podaj prawidłowe dane");
@@ -689,10 +763,12 @@ public class MyFrame extends JFrame implements ActionListener {
             }
         }
 
+        /**
+         * Obsługa przycisków pokaż Dostawców
+         * wypisanie wszystkich dostawców w postaci tabeli
+         */
         if (e.getSource() == przyciski.get(3)) {
-            /**
-             * wypisanie wszystkich dostawców
-             */
+
             for (JPanel panel : panels)
                 panel.setVisible(false);
 
@@ -750,6 +826,10 @@ public class MyFrame extends JFrame implements ActionListener {
             }
 
         }
+        /**
+         * Obsługa ComboBox'a sortującego w Panelu wyświetlającym Dostawców
+         * Dodaje możliwość sortowania wyników zwróconych przez pokaż dostawców
+         */
         if (e.getSource() == sortuj) {
 
             sortuj.removeActionListener(this);
@@ -789,6 +869,10 @@ public class MyFrame extends JFrame implements ActionListener {
                 }
             }
         }
+        /**
+         * Obsługa przycisku dodaj Produkt
+         * Tworzy formularz potrzebny do dodania produktu do bazy danych
+         */
         if (e.getSource() == przyciski.get(4)) {
 
             for (JPanel panel : panels)
@@ -868,11 +952,12 @@ public class MyFrame extends JFrame implements ActionListener {
             panels.get(4).setVisible(true);
             panels.get(4).setLayout(null);
         }
+        /**
+         * Obłsuga przycisku Dodaj Produkt w fomrularzu dodawania produktu
+         * Dodaje produkt do odpowiedniej tabeli w bazie danych
+         * Po wcześniejszej walidacji wpisanych do formularza danych
+         */
         if (e.getSource() == dodajPrzycisk) {
-            /**
-             * dodanie produktów do bazy danych
-             *
-             */
 
             if (szukaj.getText().equals("") || ileSztuk.getText().equals("") || cena.getText().equals("")) {
                 JOptionPane.showMessageDialog(this, "Podaj prawidłowe dane");
@@ -923,10 +1008,13 @@ public class MyFrame extends JFrame implements ActionListener {
             }
         }
 
+        /**
+         * Obsługa przycisku pokaż klientów
+         * wypisanie wszystkich klientów w postaci tabeli z możliwością sortowania
+         * Pobiera klientów z bazy danych tworzy z nich tabelę a następnie wyspisuje
+         */
         if (e.getSource() == przyciski.get(5)) {
-            /**
-             * wypisanie wszystkich klientów
-             */
+
             for (JPanel panel : panels)
                 panel.setVisible(false);
 
@@ -984,6 +1072,10 @@ public class MyFrame extends JFrame implements ActionListener {
             }
 
         }
+        /**
+         * Obsługa ComboBox'a odpowiedzilanego za sotrowanie wypisanej tabeli Klientów
+         * Sortuje tabele klientów w zależności od wybranego atrybutu w ComboBox'ie
+         */
         if (e.getSource() == sortuj2) {
 
             panels.get(5).setVisible(false);
@@ -1023,10 +1115,13 @@ public class MyFrame extends JFrame implements ActionListener {
                 }
             }
         }
+
+        /**
+         * Obsługa przycisku Lista Produktów
+         * wypisanie wszystkich produktów w postaci Tabeli
+         * w zależności od wybranej kategori produktu (domyślnie narzędzia)
+         */
         if (e.getSource() == przyciski.get(6)) {
-            /**
-             * wypisanie wszystkich produktów
-             */
             for (JPanel panel : panels)
                 panel.setVisible(false);
 
@@ -1057,6 +1152,11 @@ public class MyFrame extends JFrame implements ActionListener {
 
         }
 
+        /**
+         * Obsługa ComboBox'a odpowiedzialnego za wybór rodzaju produktów
+         * Obsługuje zmiane wyświetlanych produktów w zależności od rodzaju
+         * Wypisuje tabele produktów odpoowiedniego rodzaju
+         */
         if (e.getSource() == przyciskProdukty) {
 
             panels.get(6).setVisible(false);
@@ -1099,10 +1199,11 @@ public class MyFrame extends JFrame implements ActionListener {
                 }
             }
         }
+        /**
+         * Obsługa przycisku Dodaj Magazyn dostępnego tylko dla zalogowanego urzytkownika
+         * Tworzy formularz potrzbny do dodania magazynu do bazy danych
+         */
         if (e.getSource() == przyciski.get(8) && flagaLogowania == true) {
-            /**
-             * obusłga przycisku Dodaj Dostawe
-             */
             for (JPanel panel : panels)
                 panel.setVisible(false);
             panels.get(8).removeAll();
@@ -1145,11 +1246,13 @@ public class MyFrame extends JFrame implements ActionListener {
             panels.get(8).setVisible(true);
             panels.get(8).setLayout(null);
         }
+        /**
+         * Obsluga przycisku Dodaj Magazyn w formularzu dodawania magazynu
+         * Dodaje magazyn do bazy danych po wcześniejszej waldacji
+         * danych wpisanych do formularza
+         */
         if (e.getSource() == wyslijMagazyn) {
-            /**
-             * Obusłga przycisku wyślij w polu nowa dostawa
-             * Dodawanie dostawy do bazy Danych
-             */
+
             if (imie.getText().equals("") || nazwisko.getText().equals("") || adres.getText().equals(""))
                 JOptionPane.showMessageDialog(this, "Podaj prawidłowe dane");
 
@@ -1185,6 +1288,10 @@ public class MyFrame extends JFrame implements ActionListener {
 
             }
         }
+        /**
+         * Obsługa Przycisku Nowa Dostawa dostępnego tylko dla zalogowanych urzytkowników
+         * Tworzy formularz potrzebny do dodania nowej dostawy
+         */
         if (e.getSource() == przyciski.get(9) && flagaLogowania == true) {
             /**
              * obusłga przycisku Dodaj Dostawe
@@ -1231,11 +1338,13 @@ public class MyFrame extends JFrame implements ActionListener {
             panels.get(9).setVisible(true);
             panels.get(9).setLayout(null);
         }
+        /**
+         * Obsługa przycisku  Dodaj w formularzu dodawania dostawy
+         * Dodaje dostawię do bazy danych
+         * Po wcześniejszej walidacji wpisanych do formularza danych
+         */
         if (e.getSource() == wyslijDostawa) {
-            /**
-             * Obusłga przycisku wyślij w polu nowa dostawa
-             * Dodawanie dostawy do bazy Danych
-             */
+
             if (imie.getText().equals("") || nazwisko.getText().equals("") || adres.getText().equals(""))
                 JOptionPane.showMessageDialog(this, "Podaj prawidłowe dane");
             else if (adres.getText().length() != 10 || !adres.getText().matches("[1-9][0-9][0-9][0-9][-][0-1][0-9][-][0-3][0-9]"))
@@ -1277,10 +1386,13 @@ public class MyFrame extends JFrame implements ActionListener {
 
             }
         }
+        /**
+         * Obsługa przycisku Zapytanie SQL dostępnego dla zalogowanego urzytkownika
+         * Tworzy formluarz pozwalający wpisać dowolne zapytanie SQL dla polecenia
+         * SELECT tworzy tabele ze zwróconych wyników
+         */
         if (e.getSource() == przyciski.get(10) && flagaLogowania == true) {
-            /**
-             * obusłga przycisku Dodaj Dostawe
-             */
+
             for (JPanel panel : panels)
                 panel.setVisible(false);
             panels.get(10).removeAll();
@@ -1309,11 +1421,13 @@ public class MyFrame extends JFrame implements ActionListener {
             panels.get(10).add(panelTabelka2);
 
         }
-        if(e.getSource()==zapytanie){
-            /**
-             * Obusłga Dowolnego zapytania SQL tylko dla amina
-             */
 
+        /**
+         * Obsługa przycisku potwierdź w formularzu Zapytanie SQL
+         * Obusłga Dowolnego zapytania SQL tylko dla amina
+         * Wykonuje dowolne zapytanie SQL dla SELECT tworzy tabele wyników
+         */
+        if(e.getSource()==zapytanie){
             panelTabelka2.removeAll();
             panels.get(10).setVisible(false);
             if (imie.getText().equals("") ) {
