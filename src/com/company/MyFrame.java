@@ -55,6 +55,8 @@ public class MyFrame extends JFrame implements ActionListener {
     boolean flagaLogowania = false;
     JComboBox sortuj;
     JComboBox sortuj2;
+    JTextField id;
+    JTextField klient;
 
     MyFrame() {
         try {
@@ -149,6 +151,14 @@ public class MyFrame extends JFrame implements ActionListener {
 
         zapytanie.addActionListener(this);
         zapytanie.setBounds(400, 75, 120, 40);
+
+        sprzedaj = new JButton("Sprzedaj");
+        sprzedaj.setBounds(400, 260, 120, 40);
+        sprzedaj.addActionListener(this);
+
+        szukajPrzycisk.setBounds(440, 70, 120, 40);
+        szukajPrzycisk.addActionListener(this);
+
     }
 
     public static DefaultTableModel buildTableModel(ResultSet rs)
@@ -363,7 +373,7 @@ public class MyFrame extends JFrame implements ActionListener {
             szukaj.setText("");
             panels.get(1).removeAll();
             panels.get(1).setVisible(true);
-            panels.get(1).setBounds(100, 250, 600, 300);
+            panels.get(1).setBounds(100, 250, 600, 400);
 
             szukaj.setPreferredSize(new Dimension(200, 20));
             szukaj.setBounds(120, 20, 200, 20);
@@ -372,9 +382,6 @@ public class MyFrame extends JFrame implements ActionListener {
             szukajLabel.setBounds(10, 20, 100, 20);
             panels.get(1).add(szukaj);
             panels.get(1).add(szukajLabel);
-
-            szukajPrzycisk.setBounds(440, 70, 120, 40);
-            szukajPrzycisk.addActionListener(this);
 
             String[] opcje = {"Chemia", "Elektronika", "Narzędzia"};
             wybierzRodzaj = new JComboBox(opcje);
@@ -435,12 +442,13 @@ public class MyFrame extends JFrame implements ActionListener {
                 try {
                     PreparedStatement pst1 = null;
                     if (wybierzRodzaj.getSelectedItem().equals("Chemia")) {
-                        pst1 = c.prepareStatement("SELECT *  FROM projekt1.Chemia", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                        pst1 = c.prepareStatement("SELECT *  FROM projekt1.Chemia WHERE nazwa =  ? ", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                     } else if (wybierzRodzaj.getSelectedItem().equals("Elektronika")) {
-                        pst1 = c.prepareStatement("SELECT *  FROM projekt1.Elektronika", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                        pst1 = c.prepareStatement("SELECT *  FROM projekt1.Elektronika WHERE nazwa = ? ", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                     } else if (wybierzRodzaj.getSelectedItem().equals("Narzędzia")) {
-                        pst1 = c.prepareStatement("SELECT *  FROM projekt1.Narzdzia", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                        pst1 = c.prepareStatement("SELECT *  FROM projekt1.Narzdzia WHERE nazwa =  ? ", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                     }
+                    pst1.setString(1,szukaj.getText());
                     ResultSet rs1 = pst1.executeQuery();
 
 
@@ -485,17 +493,26 @@ public class MyFrame extends JFrame implements ActionListener {
                     JLabel cenaLabel = new JLabel("Cena");
                     iloscLabel.setBounds(10, 200, 100, 20);
                     cenaLabel.setBounds(10, 230, 100, 20);
-
+                    JLabel idLabel = new JLabel("id produktu");
+                    id = new JTextField("");
+                    id.setBounds(120,260,40,20);
+                    idLabel.setBounds(10,260,100,20);
+                    klient = new JTextField();
+                    klient.setBounds(120,290,40,20);
+                    JLabel klientLabel = new JLabel("id klienta");
+                    klientLabel.setBounds(10,290,100,20);
                     panels.get(1).add(cenaLabel);
                     panels.get(1).add(iloscLabel);
+                    panels.get(1).add(id);
+                    panels.get(1).add(idLabel);
+                    panels.get(1).add(klient);
+                    panels.get(1).add(klientLabel);
                     //panels.get(1).setBackground(new Color(30,80,30));
                     panels.get(1).add(cena);
                     panels.get(1).add(ileSztuk);
 
 
-                    sprzedaj = new JButton("Sprzedaj");
-                    sprzedaj.setBounds(400, 260, 120, 40);
-                    sprzedaj.addActionListener(this);
+
                     panels.get(1).add(sprzedaj);
                     rs1.close();
                     pst1.close();
@@ -507,55 +524,81 @@ public class MyFrame extends JFrame implements ActionListener {
 
         }
         if (e.getSource() == sprzedaj) {
-
             System.out.println("Przycisk Działa");
             if (c != null) {
-                try {
+
                     PreparedStatement pst = null;
                     PreparedStatement pst2 = null;
+                try {
+                    PreparedStatement pst1 = c.prepareStatement("SELECT COUNT(*) AS id FROM projekt1.sprzeda", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                    ResultSet rs1 = pst1.executeQuery();
+                    if (rs1.next())
+                        System.out.println("OK");
+                    iter = Integer.parseInt(rs1.getString("id"));
+                    rs1.close();
+                    pst1.close();
+                    iter += 1;
+                    if (klient.getText().equals("") || ileSztuk.getText().equals("") || cena.getText().equals("") || id.getText().equals("")) {
+                        JOptionPane.showMessageDialog(this, "Podaj prawidłowe dane");
+                    }
+                    System.out.println(iter + "," + Integer.parseInt(klient.getText()) + "," + Integer.parseInt(id.getText()) + ")");
+
+                    pst1.close();
+                    }catch (SQLException e1){System.out.println(" PST1 "+ e1);}
+                try {
+                    PreparedStatement pst3 = c.prepareStatement("INSERT INTO projekt1.sprzeda (id_sprzed, id_klient,id_produktu) VALUES (" + iter + "," + Integer.parseInt(klient.getText()) + "," + Integer.parseInt(id.getText()) + ")");
+                    pst3.executeQuery();
+                    pst3.close();
+                }catch (SQLException e1){System.out.println(" PST 3 "+ e1);}
+                try{
                     System.out.println("iloscS = " + iloscS);
                     if (wybierzRodzaj.getSelectedItem().equals("Chemia")) {
                         if (iloscS == 0)
-                            pst = c.prepareStatement("DELETE FROM projekt1.Chemia WHERE nazwa= ' ? '", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                            pst = c.prepareStatement("DELETE FROM projekt1.Chemia WHERE id_chemia= ?");
                         else
-                            pst2 = c.prepareStatement("UPDATE  projekt1.Chemia SET ilosc= ? WHERE nazwa=?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                            pst2 = c.prepareStatement("UPDATE  projekt1.Chemia SET ilosc= ? WHERE id_chemia=?");
                     } else if (wybierzRodzaj.getSelectedItem().equals("Elektronika")) {
                         if (iloscS == 0)
-                            pst = c.prepareStatement("DELETE FROM projekt1.Elektronika WHERE nazwa= ' ? '", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                            pst = c.prepareStatement("DELETE FROM projekt1.Elektronika WHERE id_elektronika= ? ");
                         else
-                            pst2 = c.prepareStatement("UPDATE  projekt1.Elektronika SET ilosc=? WHERE nazwa=?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                            pst2 = c.prepareStatement("UPDATE  projekt1.Elektronika SET ilosc=? WHERE id_elektronika=?");
                     } else if (wybierzRodzaj.getSelectedItem().equals("Narzędzia")) {
                         if (iloscS == 0)
-                            pst = c.prepareStatement("DELETE FROM projekt1.Narzdzia WHERE nazwa= ?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                            pst = c.prepareStatement("DELETE FROM projekt1.Narzdzia WHERE id_narz= ?");
                         else
-                            pst2 = c.prepareStatement("UPDATE  projekt1.Narzdzia SET ilosc= ? WHERE nazwa=?", ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                            pst2 = c.prepareStatement("UPDATE  projekt1.Narzdzia SET ilosc= ? WHERE id_narz=?");
                     }
 
+                }catch(SQLException e1){System.out.println("PST 2a "+e1);}
+                try {
                     if (pst != null) {
-                        pst.setString(1, szukaj.getText());
+                        pst.setInt(1, Integer.parseInt(id.getText()));
                         pst.executeQuery();
+
+                        pst.close();
                     }
+                }catch (SQLException e1){System.out.println("PST " + e1);}
+                try{
                     if (pst2 != null) {
                         if (iloscS - Integer.parseInt(ileSztuk.getText()) < 0 || Integer.parseInt(ileSztuk.getText()) < 0)
                             JOptionPane.showMessageDialog(this, "Podaj poprawną ilość");
                         else
                             pst2.setInt(1, iloscS - Integer.parseInt(ileSztuk.getText()));
 
-                        pst2.setString(2, nazwaP);
+                        pst2.setInt(2,Integer.parseInt( id.getText()));
 
                         szukaj.setText("");
                         ileSztuk.setText("");
                         cena.setText("");
                         pst2.executeQuery();
-                    }
 
-                    pst.close();
-                    pst2.close();
+                        pst2.close();
+                    }
 
                     JOptionPane.showMessageDialog(this, "Poprawnie Sprzedano");
                     panels.get(1).setVisible(false);
                 } catch (SQLException e1) {
-                    System.out.println("Blad podczas przetwarzania danych:" + e1);
+                    System.out.println("PST 2:" + e1);
                 }
             }
         }
@@ -696,7 +739,6 @@ public class MyFrame extends JFrame implements ActionListener {
                     JScrollPane scroller = new JScrollPane(tabelka, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
                     panelTabelka2.add(scroller,BorderLayout.CENTER);
                     panelTabelka2.setVisible(true);
-
                     panels.get(3).setVisible(true);
 
                     //panels.get(3).setLayout(null);
@@ -709,6 +751,8 @@ public class MyFrame extends JFrame implements ActionListener {
 
         }
         if (e.getSource() == sortuj) {
+
+            sortuj.removeActionListener(this);
             panels.get(3).setVisible(false);
             panelTabelka2.removeAll();
             if (c != null) {
