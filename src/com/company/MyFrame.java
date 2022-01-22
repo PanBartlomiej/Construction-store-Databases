@@ -215,10 +215,9 @@ public class MyFrame extends JFrame implements ActionListener {
                     }
 
                 }
-                int result = JOptionPane.showConfirmDialog(null, "Chcesz wyjsc? sprzedales = "+tyle_sprzed+" produktow", " wyjdz",
-                        JOptionPane.OK_CANCEL_OPTION);
-                if (result == JOptionPane.OK_OPTION)
-                    System.exit(0);
+                int result = JOptionPane.showConfirmDialog(null, "sprzedales dziś: "+tyle_sprzed+" produktow", " wyjdz",
+                        JOptionPane.DEFAULT_OPTION);
+
 
             } });
 
